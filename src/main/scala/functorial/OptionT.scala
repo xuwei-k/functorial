@@ -26,11 +26,11 @@ object OptionT {
   extends MonadPlus[({type λ[+X] = OptionT[M,X]})#λ]
      with Monad.Transformer[({type λ[N[+_],+B] = OptionT[N,B]})#λ] {
     import M._
-    def pure[A](a: A): OptionT[M,A] = new OptionT[M,A](M.pure(Some(a)))
+    def pure[A](a: A): OptionT[M,A] = new OptionT[M,A](M.pure(Some(a)))(M)
     def bind[A,B](m: OptionT[M,A])(k: A => OptionT[M,B]): OptionT[M,B] = m flatMap k
     override def apply[A,B](m: OptionT[M,A])(k: A => B): OptionT[M,B] = m map k
     override def or[A](x: OptionT[M,A], y: => OptionT[M,A]): OptionT[M,A] = x | y
-    def empty: OptionT[M,Nothing] = new OptionT[M,Nothing](M.pure(None))
+    def empty: OptionT[M,Nothing] = new OptionT[M,Nothing](M.pure(None))(M)
     def lift[N[+_],A](n: N[A])(implicit N:Monad[N]): OptionT[N,A] = new OptionT[N,A](N(n)(Some[A]))
   }
   def monad[M[+_],E](implicit M:Monad[M]): OptionT.monadPlus[M] = new OptionT.monadPlus[M](M)

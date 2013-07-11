@@ -30,13 +30,13 @@ object EitherT {
   extends MonadRaise[({type λ[+X] = EitherT[M,E,X]})#λ, E]
      with Monad.Transformer[({type λ[N[+_],+B] = EitherT[N,E,B]})#λ] {
     import M._
-    def pure[A](a: A): EitherT[M,E,A] = new EitherT[M,E,A](M.pure(Right(a)))
+    def pure[A](a: A): EitherT[M,E,A] = new EitherT[M,E,A](M.pure(Right(a)))(M)
     def bind[A,B](m: EitherT[M,E,A])(k: A => EitherT[M,E,B]): EitherT[M,E,B] = m flatMap k
     override def apply[A,B](m: EitherT[M,E,A])(k: A => B): EitherT[M,E,B] = m map k
     override def or[A](x: EitherT[M,E,A], y: => EitherT[M,E,A]): EitherT[M,E,A] = x | y
     def handle[A](m: EitherT[M,E,A])(k: E => EitherT[M,E,A]): EitherT[M,E,A] = m handling k 
     def lift[N[+_],A](n: N[A])(implicit N:Monad[N]): EitherT[N,E,A] = new EitherT[N,E,A](N(n)(Right[E,A]))
-    def raise(a: E): EitherT[M,E,Nothing] = new EitherT[M,E,Nothing](M.pure(Left(a)))
+    def raise(a: E): EitherT[M,E,Nothing] = new EitherT[M,E,Nothing](M.pure(Left(a)))(M)
   }
   def monad[M[+_],E](implicit M:Monad[M]): EitherT.monadOr[M,E] = new EitherT.monadOr[M,E](M)
 }
